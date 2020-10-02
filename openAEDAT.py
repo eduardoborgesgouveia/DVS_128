@@ -3,11 +3,7 @@ import cv2
 import sys
 import struct
 import numpy as np
-from scipy import  signal
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from keras.models import model_from_json
-from filterUtils import filterUtils
+
 
 class aedatUtils:
 
@@ -200,94 +196,5 @@ class aedatUtils:
 
     
 
-    def loadDataDemo():
-        #read data
-        path = '/home/eduardo/Documentos/DVS/Eduardo work/Mestrado/Datasource/AEDAT_files/random data/shorter records/multi_objects_2.aedat'
-        t, x, y, p = aedatUtils.loadaerdat(path)
-        promediar = False
-        tI=100000 #10 ms
-        # tI=10000 #10 ms
-
-        totalImages = []
-        totalImages = aedatUtils.getFramesTimeBased(t,p,x,y,tI,False)
-
-        #plot
-        fig,axarr = plt.subplots(1)
-        handle = None
-        if promediar == True:
-            maxProMediacao = 10
-            indexProMediacao = 0
-            imagemPromediada = np.zeros([128,128])
-            for f in totalImages:
-                f = f.astype(np.uint8)
-                f[f==0] = 1
-                f[f==255] = 1
-                f[f==127] = 0
-                imagemPromediada += f
-                indexProMediacao += 1
-                if indexProMediacao == 10:
-                    indexProMediacao = 0
-                    imagemPromediada = imagemPromediada/10
-                    imagemPromediada = imagemPromediada*255
-                    imagemPromediada = imagemPromediada.astype(np.uint8)
-                    if handle is None:
-                        handle = plt.imshow(np.dstack([imagemPromediada,imagemPromediada,imagemPromediada]))
-                        #handle = plt.imshow(imagemPromediada)
-                    else:
-                        handle = plt.imshow(np.dstack([imagemPromediada,imagemPromediada,imagemPromediada]))
-                        #handle.set_data(imagemPromediada)
-                    imagemPromediada = np.zeros([128,128])
-                    plt.pause(0.01)
-                    plt.draw()
-        else:
-            for f in totalImages:
-                f = f.astype(np.uint8)
-                #f = filterUtils.sobelFilter(f)
-                if handle is None:
-                    handle = plt.imshow(np.dstack([f,f,f]))
-                else:
-                    handle = plt.imshow(np.dstack([f,f,f]))
-
-                plt.pause(0.01)
-                plt.draw()
-       
-
-
-    def main(objClass=None, tI=50000, split=False, size=0.20):
-        if objClass == None:
-            t, x, y, p = loadaerdat("/home/user/GitHub/Classification_DVS128/aedatFiles/" + input("Nome do arquivo:") + ".aedat")
-        else:
-            objClass = objClass.split(", ")
-            totalImages = []
-            labels = []
-            for j, v in enumerate(objClass):
-                t, x, y, p = loadaerdat("/home/user/GitHub/Classification_DVS128/aedatFiles/" + str(v) + ".aedat")
-                i, aux = 0, 0
-                images = []
-                while (i + tI) < t[-1]:
-                    t2 = t[(i < t) & (t <= i + tI)]
-                    x2 = x[aux : aux + len(t2)]
-                    y2 = y[aux : aux + len(t2)]
-                    p2 = p[aux : aux + len(t2)]
-                    aux += len(t2)
-                    images.append(matrix_active(x2, y2, p2))	
-                    labels.append([j])
-                    i += tI
-                totalImages.extend(images)
-                
-            totalImages, labels = np.array(totalImages), np.array(labels)
-            
-            randomize = np.arange(len(labels))
-            np.random.shuffle(randomize)
-            totalImages = totalImages[randomize]
-            labels = labels[randomize]
-            
-            if split:
-                totalImages_train, totalImages_test, labels_train, labels_test = train_test_split(totalImages, labels, test_size=size, random_state=42)
-                return totalImages_train, totalImages_test, labels_train, labels_test
-            else:
-                return totalImages, labels
-        
-        
-if __name__ == "__main__":
-	aedatUtils.loadDataDemo()
+   
+    
